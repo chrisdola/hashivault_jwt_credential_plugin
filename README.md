@@ -1,0 +1,1 @@
+# hashivault_jwt_credential_plugin
