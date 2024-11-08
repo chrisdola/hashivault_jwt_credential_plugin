@@ -15,7 +15,7 @@ def read_key(path):
     except Exception as e:
         raise ValueError("Error while parsing key file: {0}".format(e))
 
-def encode_jwt(jwk, jwt_expiry, org, team, bound_issuer):
+def encode_jwt(jwk, jwt_expiry, org, team, bound_issuer, aud):
     jwt_instance = JWT()
     now = int(time.time())
     payload = {
@@ -25,6 +25,7 @@ def encode_jwt(jwk, jwt_expiry, org, team, bound_issuer):
         'team': team,
         'sub': 'sub',
         'bound_issuer': bound_issuer,
+        'aud': aud
     }
     try:
         return jwt_instance.encode(payload, jwk, alg='RS256')
@@ -37,9 +38,10 @@ def gen_jwt(**kwargs):
     key_path = kwargs.get('key_path')
     jwt_expiry = kwargs.get('jwt_expiry')
     bound_issuer = kwargs.get('bound_issuer')
+    vault_url = kwargs.get('vault_url')
 
     jwk = read_key(key_path)
-    workload_jwt = encode_jwt(jwk, jwt_expiry, org, team, bound_issuer)
+    workload_jwt = encode_jwt(jwk, jwt_expiry, org, team, bound_issuer, vault_url)
 
     try:
         return workload_jwt
@@ -73,7 +75,7 @@ def gen_wrapped_secret_id(**kwargs):
     vault_url = kwargs.get('vault_url')
     bound_issuer = kwargs.get('bound_issuer')
 
-    jwt = gen_jwt(org=org, team=team, team_vault_approle=team_vault_approle, key_path=key_path, jwt_expiry=jwt_expiry,bound_issuer=bound_issuer)
+    jwt = gen_jwt(org=org, team=team, team_vault_approle=team_vault_approle, key_path=key_path, jwt_expiry=jwt_expiry,bound_issuer=bound_issuer, vault_url=vault_url)
     token = vault_jwt_login(tower_jwt_role=tower_jwt_role, jwt=jwt, vault_url=vault_url)
 
     vault_url = urljoin(vault_url, 'v1')
