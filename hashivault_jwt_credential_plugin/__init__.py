@@ -51,11 +51,12 @@ def gen_jwt(**kwargs):
 def vault_jwt_login(**kwargs):
     tower_jwt_role = kwargs['tower_jwt_role']
     jwt = kwargs['jwt']
+    vault_jwt_path = kwargs['vault_jwt_path']
 
     vault_url = urljoin(kwargs['vault_url'], 'v1')
     data = {'role': tower_jwt_role, 'jwt': jwt}
     sess = requests.Session()
-    request_url = '/'.join([vault_url, 'auth/jwt/login'])
+    request_url = '/'.join([vault_url, 'auth', vault_jwt_path, 'login'])
 
     resp = sess.post(request_url, json=data, timeout=30, verify=False)
     resp.raise_for_status()
@@ -74,9 +75,11 @@ def gen_wrapped_secret_id(**kwargs):
     wrap_ttl = kwargs.get('wrap_ttl')
     vault_url = kwargs.get('vault_url')
     bound_issuer = kwargs.get('bound_issuer')
+    vault_jwt_path = kwargs.get('vault_jwt_path')
+    vault_approle_path = kwargs.get('vault_approle_path')
 
     jwt = gen_jwt(org=org, team=team, team_vault_approle=team_vault_approle, key_path=key_path, jwt_expiry=jwt_expiry,bound_issuer=bound_issuer, vault_url=vault_url)
-    token = vault_jwt_login(tower_jwt_role=tower_jwt_role, jwt=jwt, vault_url=vault_url)
+    token = vault_jwt_login(tower_jwt_role=tower_jwt_role, jwt=jwt, vault_url=vault_url, vault_jwt_path=vault_jwt_path)
 
     vault_url = urljoin(vault_url, 'v1')
     request_kwargs = {'timeout': 30, 'verify': 'False'}
@@ -85,7 +88,7 @@ def gen_wrapped_secret_id(**kwargs):
     # Compatibility header for older installs of Hashicorp Vault
     sess.headers['X-Vault-Token'] = token
     sess.headers['X-Vault-Wrap-Ttl'] = wrap_ttl
-    request_url = '/'.join([vault_url, 'auth/approle/role', team_vault_approle, 'secret-id'])
+    request_url = '/'.join([vault_url, 'auth', vault_approle_path, 'role', team_vault_approle, 'secret-id'])
 
     resp = sess.post(request_url, timeout=30, verify=False)
     resp.raise_for_status()
@@ -128,6 +131,18 @@ hashivault_jwt_credential_plugin = CredentialPlugin(
             'label': 'Tower Vault JWT Role',
             'type': 'string',
             'help_text': 'Name of the Tower\'s Vault JWT Role'
+        }, {
+            'id': 'vault_jwt_path',
+            'label': 'Vault JWT Auth path',
+            'type': 'string',
+            'default': 'jwt',
+            'help_text': 'The name/path of the JWT auth method\'s mount in vault. Defaults to \'jwt\''
+        }, {
+            'id': 'vault_approle_path',
+            'label': 'Vault AppRole Auth path',
+            'type': 'string',
+            'default': 'approle',
+            'help_text': 'The name/path of the AppRole auth method\'s mount in vault. Defaults to \'approle\''
         }],
         'metadata': [{
             'id': 'team',
