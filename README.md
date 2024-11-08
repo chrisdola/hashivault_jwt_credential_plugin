@@ -4,7 +4,7 @@ This AAP plugin is intended to allow a Tower Credential to provide a wrapped sec
 
 **Why use this type of credential plugin?**
 
-"Secret-zero" is a common challenge when managing Vault AppRole credentials - how do you securely pre-seed the secret-id into a process without just storing the secret-id somewhere else? Within Tower/AAP that's a common problem one would face since all the existing solutions rely on manually storing the secret-id in a credential or even storing it within an Ansible Vault. Plus depending on the Ansible environment. Not ideal right?
+"Secret-zero" is a common challenge when managing Vault AppRole credentials - how do you securely pre-seed the secret-id into a process without just storing the secret-id somewhere else? Within Tower/AAP that's a common problem one would face since all the existing solutions rely on manually storing the secret-id in a credential or even storing it within an Ansible Vault. Not ideal right?
 
 This plugin attempts to create a more secure way to provide Vault credentials to a playbook by allowing Tower/AAP to act as a "trusted orchestrator" to issue Vault secrets.
 
