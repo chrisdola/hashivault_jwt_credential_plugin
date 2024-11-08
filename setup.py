@@ -7,7 +7,7 @@ requirements = ["jwt"]  # add Python dependencies here
 
 setup(
     name='hashivault_jwt_credential_plugin',
-    version='0.6',
+    version='0.5',
     author='Chris LaMendola',
     author_email='clamendola1992@gmail.com',
     description='',
